@@ -155,3 +155,35 @@ defmodule Recursion do
   end
 end
 ```
+
+## Day 03 - Data Structure Exploration
+### The Puzzle
+So the puzzle for day 3 requires a bit of brain. The way I decided to tackle it follows 5 steps:
+
+1. Parse an instruction list, draw each coordinate on a board.
+2. Do it twice for both wires.
+3. Find all intersections of the two wires. That is, the coordinates that's mapped on both boards.
+4. For part 1, return the combined value of the nearest coordinate.
+5. For part 2, return the minimum "steps" it takes for two wires to intersect.
+
+### Common Data Collection Types in Elixir
+- **lists**
+	- [+] ordered array
+	- [-] linear time in lookup and inserting (if not from the head)
+- **maps**
+- [+] fast lookup
+- [-] *not exactly sorted
+- **map sets**
+  - [+] guaranteed uniqueness; fast lookup.
+  - [-] *not exactly sorted
+
+\* Small maps are ordered lists where the map has <= 31 entries. When a map gets 32 entries, it changes to a hash trie ([Hash Array Mapped Trie](https://en.wikipedia.org/wiki/Hash_array_mapped_trie)) that has a lookup of O(log n).  
+ref: https://stackoverflow.com/questions/35677865/is-map-lookup-in-elixir-o1
+
+### Puzzle implementation
+For part 1 I chose to use `MapSet` for my two boards, because what I eventually need is just a way to know if the wire has "been there" on the board. Also, `MapSet` provides this `MapSet.intersection/2` function that's handy when retriving the coordinates that both wires have visited on the board.
+
+For part 2 I used `Map` instead because I need to store an associative value "steps" for each coordinate.
+
+### Some Thoughts
+I wrote two recursive functions `SpaceShip.draw_board/3` and `SpaceShip.draw_board_with_steps/4` for the two parts. When I tried to search online for best practices, I noticed that it seems to be a convention/preferred design that we use separate same-name methods for different conditions([example](https://gitlab.com/NobbZ/aoc_ex/blob/master/lib/y2019/d3.ex)). That is, we do pattern matching at the function argument-passing level. That eliminates the need for `if/else` statements but also creates another layer of repetition (for example I ended up writing four methods for each recursion). I'm not sure yet how it contributes to readability. But perhaps when I get more familiar with Elixir I'll have more to say on this. We'll see!  
