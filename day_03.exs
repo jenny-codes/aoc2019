@@ -14,8 +14,10 @@ defmodule SpaceShip do
   end
 
   # puzzle 1
-  def calculate_nearest_intersection_distance([board1, board2]) do
-    MapSet.intersection(board1, board2)
+  def calculate_nearest_intersection_distance(boards) do
+    boards
+    |> Enum.map(&MapSet.new/1)
+    |> fn [b1, b2] -> MapSet.intersection(b1, b2) end.()
     |> Enum.map(fn {x, y} -> abs(x) + abs(y) end)
     |> Enum.min()
   end
@@ -23,48 +25,14 @@ defmodule SpaceShip do
   # puzzle 2
   def calculate_intersection_with_fewest_steps([board1, board2]) do
     [board1, board2]
-    |> Enum.map(&Map.keys/1)
     |> Enum.map(&MapSet.new/1)
-    |> (fn [set1, set2] -> MapSet.intersection(set1, set2) end).()
-    |> Enum.map(fn key -> board1[key] + board2[key] end)
+    |> fn [b1, b2] -> MapSet.intersection(b1, b2) end.()
+    |> Enum.map(fn coord ->
+      b1_steps = Enum.find_index(board1, fn pos -> pos == coord end) + 1
+      b2_steps = Enum.find_index(board2, fn pos -> pos == coord end) + 1
+      b1_steps + b2_steps
+    end)
     |> Enum.min()
-  end
-
-  # -----------------------------------------------------------------
-  # draw_board_with_steps([instructions], {current_location}, steps, %{board})/3
-  # -----------------------------------------------------------------
-
-  # first entry
-  def draw_board_with_steps(instructions) do
-    draw_board_with_steps(instructions, {0, 0}, 0, Map.new())
-  end
-
-  # finish all instructions
-  def draw_board_with_steps([], _, _, board) do
-    board
-  end
-
-  # finished traversing current instruction
-  def draw_board_with_steps([{_, 0} | instructions], current_pos, steps, board) do
-    draw_board_with_steps(instructions, current_pos, steps, board)
-  end
-
-  # traversing current instructions
-  def draw_board_with_steps([{dir, dis} | instructions], {x, y}, steps, board) do
-    new_pos =
-      case dir do
-        :u -> {x, y + 1}
-        :d -> {x, y - 1}
-        :r -> {x + 1, y}
-        :l -> {x - 1, y}
-      end
-
-    draw_board_with_steps(
-      [{dir, dis - 1} | instructions],
-      new_pos,
-      steps + 1,
-      Map.put_new(board, new_pos, steps + 1)
-    )
   end
 
   # -----------------------------------------------------------------
@@ -77,7 +45,7 @@ defmodule SpaceShip do
 
   # finished all instructions
   def draw_board([], _, board) do
-    MapSet.new(board)
+    Enum.reverse(board)
   end
 
   # finished traversing current instruction
@@ -107,6 +75,6 @@ SpaceShip.to_instruction_lists('input/day_03.txt')
 
 # puzzle 2
 SpaceShip.to_instruction_lists('input/day_03.txt')
-|> Enum.map(&SpaceShip.draw_board_with_steps/1)
+|> Enum.map(&SpaceShip.draw_board/1)
 |> SpaceShip.calculate_intersection_with_fewest_steps()
 |> (fn answer -> IO.puts("puzzle 2: #{answer}") end).()
