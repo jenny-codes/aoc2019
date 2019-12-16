@@ -1,44 +1,39 @@
 defmodule SpaceShip do
-  def possible_passwords_count(range) do
-    range
-    |> Enum.map(&is_valid_password?/1)
-    |> Enum.count(&(&1 == true))
+  def is_valid_password?(num, status \\ 'pending')
+
+  # finished iteration
+  def is_valid_password?(num, status) when div(num, 10) == 0 do
+    status == 'pass' || status == 'matching'
   end
 
-  def is_valid_password?(num) do
-    digits =
-      num
-      |> to_string()
-      |> String.split("", trim: true)
-      |> Enum.map(&String.to_integer/1)
+  def is_valid_password?(num, status) do
+    cur = rem(num, 10)
+    num = div(num, 10)
+    next = rem(num, 10)
 
-    # Part 1
-    # Enum.sort(digits) == digits && has_same_adjacent_digits?(digits)
+    cond do
+      cur < next ->
+        false
 
-    # Part 2
-    Enum.sort(digits) == digits && has_one_pair_same_digits?(digits)
-  end
+      cur == next ->
+        case status do
+          'pass' -> is_valid_password?(num, 'pass')
+          'pending' -> is_valid_password?(num, 'matching')
+          'matching' -> is_valid_password?(num, 'exceeding')
+          'exceeding' -> is_valid_password?(num, 'exceeding')
+        end
 
-  def has_same_adjacent_digits?([_ | digits]) when digits == [], do: false
-  def has_same_adjacent_digits?([n | digits]) when n == hd(digits), do: true
-  def has_same_adjacent_digits?([_ | digits]), do: has_same_adjacent_digits?(digits)
-
-  def has_one_pair_same_digits?(digits, count \\ 1)
-
-  def has_one_pair_same_digits?(digits, count) when tl(digits) == [],
-    do: count == 2
-
-  def has_one_pair_same_digits?([n | tail], count) when n == hd(tail) do
-    has_one_pair_same_digits?(tail, count + 1)
-  end
-
-  def has_one_pair_same_digits?([_ | digits], count) do
-    case count do
-      2 -> true
-      _ -> has_one_pair_same_digits?(digits, 1)
+      true ->
+        case status do
+          'matching' -> is_valid_password?(num, 'pass')
+          'exceeding' -> is_valid_password?(num, 'pending')
+          _ -> is_valid_password?(num, status)
+        end
     end
   end
 end
 
-SpaceShip.possible_passwords_count(109_165..576_723)
+109_165..576_723
+|> Enum.filter(&SpaceShip.is_valid_password?/1)
+|> Enum.count()
 |> IO.puts()
