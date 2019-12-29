@@ -187,3 +187,15 @@ There is (as always) another implementation that solves the two puzzles with mor
 
 ### Some Thoughts
 I wrote an recursive function `SpaceShip.draw_board/3` as part of my solution. When I tried to search online for best practices, I noticed that it seems to be a convention/preferred design that we use separate same-name methods for different conditions([example](https://gitlab.com/NobbZ/aoc_ex/blob/master/lib/y2019/d3.ex)). That is, we do pattern matching at the function argument-passing level. That eliminates the need for `if/else` statements but also creates another layer of repetition (for example I ended up writing four methods for each recursion). I'm not sure yet how it contributes to readability. But perhaps when I get more familiar with Elixir I'll have more to say on this. We'll see!  
+
+## Day 5 - How does Elixir manage memory?
+So this thing has been in my head: how does Elixir manages its memory if all data structures are immutable? Doesn't that mean everytime we try to add a new element into a, say, 5-element list, the memory it takes instantly doubles? After doing some research, I found out this concept called **structural sharing**.
+
+### Structural Sharing
+It actuall takes advantage of the recursive nature of Elixir objects.  Using a trie hash map.
+
+### Resources
+- https://www.freecodecamp.org/news/elixir-why-linked-lists-aa6828b6b099/
+- https://github.com/dt-fe/weekly/issues/14
+- https://en.wikipedia.org/wiki/Trie
+
