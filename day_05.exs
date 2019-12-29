@@ -48,6 +48,62 @@ defmodule IntCode do
           i + 2
         )
 
+      5 ->
+        {first_param, second_param} = calculate_ops(data, i)
+
+        case first_param do
+          0 ->
+            calculate(data, i + 3)
+
+          _ ->
+            calculate(data, second_param)
+        end
+
+      6 ->
+        {first_param, second_param} = calculate_ops(data, i)
+
+        case first_param do
+          0 ->
+            calculate(data, second_param)
+
+          _ ->
+            calculate(data, i + 3)
+        end
+
+      7 ->
+        {first_param, second_param} = calculate_ops(data, i)
+
+        cond do
+          first_param < second_param ->
+            calculate(
+              Map.put(data, data[i + 3], 1),
+              i + 4
+            )
+
+          true ->
+            calculate(
+              Map.put(data, data[i + 3], 0),
+              i + 4
+            )
+        end
+
+      8 ->
+        {first_param, second_param} = calculate_ops(data, i)
+
+        cond do
+          first_param == second_param ->
+            calculate(
+              Map.put(data, data[i + 3], 1),
+              i + 4
+            )
+
+          true ->
+            calculate(
+              Map.put(data, data[i + 3], 0),
+              i + 4
+            )
+        end
+
       99 ->
         data[0]
     end
