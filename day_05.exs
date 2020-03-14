@@ -9,12 +9,18 @@ defmodule IntCode do
     |> Map.new(fn {x, i} -> {i, x} end)
   end
 
-  def calculate(data, i \\ 0) do
+  def execute(data, inputs:) do
+    data
+    |> update_with_inputs()
+    |> execute()
+  end
+
+  def execute(data, i \\ 0) do
     case rem(data[i], 100) do
       1 ->
         {first_op, second_op} = calculate_ops(data, i)
 
-        calculate(
+        execute(
           Map.put(data, data[i + 3], first_op + second_op),
           i + 4
         )
@@ -22,13 +28,13 @@ defmodule IntCode do
       2 ->
         {first_op, second_op} = calculate_ops(data, i)
 
-        calculate(
+        execute(
           Map.put(data, data[i + 3], first_op * second_op),
           i + 4
         )
 
       3 ->
-        calculate(
+        execute(
           Map.put(
             data,
             data[i + 1],
@@ -43,7 +49,7 @@ defmodule IntCode do
         {value, _} = calculate_ops(data, i)
         IO.puts(value)
 
-        calculate(
+        execute(
           data,
           i + 2
         )
@@ -53,10 +59,10 @@ defmodule IntCode do
 
         case first_param do
           0 ->
-            calculate(data, i + 3)
+            execute(data, i + 3)
 
           _ ->
-            calculate(data, second_param)
+            execute(data, second_param)
         end
 
       6 ->
@@ -64,10 +70,10 @@ defmodule IntCode do
 
         case first_param do
           0 ->
-            calculate(data, second_param)
+            execute(data, second_param)
 
           _ ->
-            calculate(data, i + 3)
+            execute(data, i + 3)
         end
 
       7 ->
@@ -75,13 +81,13 @@ defmodule IntCode do
 
         cond do
           first_param < second_param ->
-            calculate(
+            execute(
               Map.put(data, data[i + 3], 1),
               i + 4
             )
 
           true ->
-            calculate(
+            execute(
               Map.put(data, data[i + 3], 0),
               i + 4
             )
@@ -92,13 +98,13 @@ defmodule IntCode do
 
         cond do
           first_param == second_param ->
-            calculate(
+            execute(
               Map.put(data, data[i + 3], 1),
               i + 4
             )
 
           true ->
-            calculate(
+            execute(
               Map.put(data, data[i + 3], 0),
               i + 4
             )
@@ -127,8 +133,14 @@ defmodule IntCode do
 
   def value_with(data, value, mode) when mode == 0, do: data[value]
   def value_with(_, value, mode) when mode == 1, do: value
+
+  def update_with_inputs(data, {first, second}) do
+    data
+    |> Map.put(1, first)
+    |> Map.put(2, second)
+  end
 end
 
 'input/day_05.txt'
 |> IntCode.get_input_to_map()
-|> IntCode.calculate()
+|> IntCode.execute()
