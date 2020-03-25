@@ -9,16 +9,16 @@ defmodule Spaceship.RegistryTest do
     %{registry: registry}
   end
 
-  test 'successful spawning buckets returns ok', %{registry: registry} do
-    assert :ok == Spaceship.Registry.create(registry, 'a bucket')
+  test "successful spawning buckets returns ok", %{registry: registry} do
+    assert :ok == Spaceship.Registry.create(registry, "a bucket")
   end
 
-  test 'lookup with inexistent name returns error', %{registry: registry} do
-    assert :error == Spaceship.Registry.lookup(registry, 'nonexistent bucket')
+  test "lookup with inexistent name returns error", %{registry: registry} do
+    assert :error == Spaceship.Registry.lookup(registry, "nonexistent bucket")
   end
 
-  test 'successful lookup returns desired bucket', %{registry: registry} do
-    Spaceship.Registry.create(registry, 'a bucket')
-    assert {:ok, _bucket} = Spaceship.Registry.lookup(registry, 'a bucket')
+  test "successful lookup returns desired bucket", %{registry: registry} do
+    Spaceship.Registry.create(registry, "a bucket")
+    assert {:ok, _bucket} = Spaceship.Registry.lookup(registry, "a bucket")
   end
 end
