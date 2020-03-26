@@ -29,24 +29,45 @@ defmodule Spaceship.Registry do
   ## Defining GenServer Callbacks
 
   @impl true
+  @spec init(:ok) :: {:ok, {%{}, %{}}}
   def init(:ok) do
-    {:ok, %{}}
+    names = %{}
+    refs = %{}
+    {:ok, {names, refs}}
   end
 
   @impl true
-  def handle_call({:lookup, name}, _from, names) do
-    {:reply, Map.fetch(names, name), names}
+  def handle_call({:lookup, name}, _from, state) do
+    {names, _} = state
+    {:reply, Map.fetch(names, name), state}
   end
 
   @impl true
-  # `names` is the current server state
-  def handle_cast({:create, name}, names) do
+  def handle_cast({:create, name}, state) do
+    {names, refs} = state
+
     if Map.has_key?(names, name) do
-      {:noreply, names}
+      {:noreply, state}
     else
       {:ok, bucket} = Spaceship.Bucket.start_link([])
+      ref = Process.monitor(bucket)
+      new_refs = Map.put(refs, ref, name)
+      new_names = Map.put(names, name, bucket)
       # returning a new server state
-      {:noreply, Map.put(names, name, bucket)}
+      {:noreply, {new_names, new_refs}}
     end
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
+    {names, refs} = state
+    {name, refs} = Map.pop(refs, ref)
+    names = Map.delete(names, name)
+    {:noreply, {names, refs}}
+  end
+
+  @impl true
+  def handle_info(_msg, state) do
+    {:noreply, state}
   end
 end
