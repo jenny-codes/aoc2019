@@ -24,3 +24,6 @@ spaceship-*.tar
 
 # vscode linter
 /.elixir_ls/
+
+# vscode setting
+settings.json
