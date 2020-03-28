@@ -5,6 +5,7 @@ defmodule AmplificationCircuit do
   def find_max_output_value_in(permutations, program) do
     Enum.reduce(permutations, 0, fn permutation, acc ->
       output = output_value_with_phase_setting_sequence(permutation, program)
+
       cond do
         output > acc -> output
         output <= acc -> acc
@@ -14,7 +15,7 @@ defmodule AmplificationCircuit do
 
   def output_value_with_phase_setting_sequence(sequence, program) do
     Enum.reduce(sequence, 0, fn phase_setting, previous_output ->
-      Intcode.execute(phase_setting, inputs: [ phase_setting, previous_output ])
+      Intcode.execute(phase_setting, inputs: [phase_setting, previous_output])
     end)
   end
 end
@@ -23,7 +24,7 @@ defmodule Util do
   def permutations([]), do: [[]]
 
   def permutations(list) do
-    for elem <- list, rest <- permutations(list--[elem]), do: [elem|rest]
+    for elem <- list, rest <- permutations(list -- [elem]), do: [elem | rest]
   end
 end
 

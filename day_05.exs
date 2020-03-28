@@ -1,18 +1,10 @@
-# require IEx
-
-defmodule IntCode do
+defmodule Intcode do
   def get_input_to_map(input) do
     File.read!(input)
     |> String.split(",", trim: true)
     |> Stream.map(&String.to_integer/1)
     |> Stream.with_index()
     |> Map.new(fn {x, i} -> {i, x} end)
-  end
-
-  def execute(data, inputs:) do
-    data
-    |> update_with_inputs()
-    |> execute()
   end
 
   def execute(data, i \\ 0) do
@@ -133,14 +125,8 @@ defmodule IntCode do
 
   def value_with(data, value, mode) when mode == 0, do: data[value]
   def value_with(_, value, mode) when mode == 1, do: value
-
-  def update_with_inputs(data, {first, second}) do
-    data
-    |> Map.put(1, first)
-    |> Map.put(2, second)
-  end
 end
 
 'input/day_05.txt'
-|> IntCode.get_input_to_map()
-|> IntCode.execute()
+|> Intcode.get_input_to_map()
+|> Intcode.execute()
