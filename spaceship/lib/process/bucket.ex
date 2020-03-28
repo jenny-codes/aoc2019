@@ -1,5 +1,5 @@
 defmodule Spaceship.Bucket do
-  use Agent
+  use Agent, restart: :temporary
 
   @doc """
   Starts a new bucket.

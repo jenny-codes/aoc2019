@@ -28,4 +28,13 @@ defmodule Spaceship.RegistryTest do
     Agent.stop(bucket)
     assert Spaceship.Registry.lookup(registry, "a bucket") == :error
   end
+
+  test 'removes bucket on crash', %{registry: registry} do
+    Spaceship.Registry.create(registry, "a bucket")
+    {:ok, bucket} = Spaceship.Registry.lookup(registry, "a bucket")
+
+    # Stop the bucket with non-normal reason
+    Agent.stop(bucket, :shutdown)
+    assert Spaceship.Registry.lookup(registry, "a bucket") == :error
+  end
 end

@@ -20,4 +20,8 @@ defmodule Spaceship.BucketTest do
     Spaceship.Bucket.delete(bucket, "a_key")
     assert Spaceship.Bucket.get(bucket, "a_key") == nil
   end
+
+  test "buckets are temporary workers" do
+    assert Supervisor.child_spec(Spaceship.Bucket, []).restart == :temporary
+  end
 end

@@ -49,10 +49,10 @@ defmodule Spaceship.Registry do
     if Map.has_key?(names, name) do
       {:noreply, state}
     else
-      {:ok, bucket} = Spaceship.Bucket.start_link([])
-      ref = Process.monitor(bucket)
+      {:ok, pid} = DynamicSupervisor.start_child(Spaceship.BucketSupervisor, Spaceship.Bucket)
+      ref = Process.monitor(pid)
       new_refs = Map.put(refs, ref, name)
-      new_names = Map.put(names, name, bucket)
+      new_names = Map.put(names, name, pid)
       # returning a new server state
       {:noreply, {new_names, new_refs}}
     end
