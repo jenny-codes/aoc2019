@@ -1,4 +1,4 @@
-defmodule Spaceship.Component.Intcode do
+defmodule Spaceship.Component.IntcodeMachine do
   def build_program(input_str) do
     input_str
     |> String.split(",", trim: true)
