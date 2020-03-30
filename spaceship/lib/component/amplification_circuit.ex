@@ -1,4 +1,4 @@
-defmodule Spaceship.Component.AmplificationCircuit do
+defmodule Spaceship.AmplificationCircuit do
   # INITIAL_INPUT = 0
 
   def execute_program_in_sequence(program, sequence) do

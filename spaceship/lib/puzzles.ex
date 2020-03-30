@@ -11,7 +11,7 @@ defmodule Spaceship.Puzzles do
 
     [0,1,2,3,4]
     |> Spaceship.Util.permutations
-    |> Enum.map(&Spaceship.Component.AmplificationCircuit.execute_program_in_sequence(program, &1))
+    |> Enum.map(&Spaceship.AmplificationCircuit.execute_program_in_sequence(program, &1))
     |> Enum.max
   end
 end

@@ -1,3 +1,3 @@
-defmodule Spaceship.Component.AmplificationCircuitTest do
+defmodule Spaceship.AmplificationCircuitTest do
   use ExUnit.Case, async: true
 end
