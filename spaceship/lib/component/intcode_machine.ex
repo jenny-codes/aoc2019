@@ -7,49 +7,49 @@ defmodule Spaceship.Component.IntcodeMachine do
     |> Map.new(fn {x, i} -> {i, x} end)
   end
 
-  def execute(program, ops \\ []) do
-    execute(program, opcode_for(program[0]), 0, ops)
+  def execute(program, opts \\ []) do
+    execute(program, opcode_for(program[0]), 0, opts)
   end
 
   @spec execute(nil | keyword | map, any, number, any) :: any
-  def execute(program, opcode, i, ops) when opcode == 1 do
+  def execute(program, opcode, i, opts) when opcode == 1 do
     next_pos = i + 4
     {first_op, second_op} = calculate_ops(program, i)
     updated_program = Map.put(program, program[i + 3], first_op + second_op)
 
-    if ops[:is_debug],
+    if opts[:is_debug],
       do: {updated_program, next_pos},
-      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, ops)
+      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
   end
 
-  def execute(program, opcode, i, ops) when opcode == 2 do
+  def execute(program, opcode, i, opts) when opcode == 2 do
     next_pos = i + 4
     {first_op, second_op} = calculate_ops(program, i)
     updated_program = Map.put(program, program[i + 3], first_op * second_op)
 
-    if ops[:is_debug],
+    if opts[:is_debug],
       do: {updated_program, next_pos},
-      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, ops)
+      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
   end
 
-  def execute(program, opcode, i, ops) when opcode == 3 do
+  def execute(program, opcode, i, opts) when opcode == 3 do
     next_pos = i + 2
     [input | input_args] = opts[:input_args]
     updated_opts = Keyword.put(opts, :input_args, input_args)
     updated_program = Map.put(program, program[i + 1], input)
 
-    if ops[:is_debug],
+    if opts[:is_debug],
       do: {updated_program, next_pos},
       else:
         execute(
           updated_program,
           opcode_for(updated_program[next_pos]),
           next_pos,
-          updated_ops
+          updated_opts
         )
   end
 
-  def execute(program, opcode, i, _ops) when opcode == 4 do
+  def execute(program, opcode, i, _opts) when opcode == 4 do
     {value, _} = calculate_ops(program, i)
     value
     # next_pos = i + 2
@@ -57,7 +57,7 @@ defmodule Spaceship.Component.IntcodeMachine do
     # execute(program, next_pos, next_opcode, input_args)
   end
 
-  def execute(program, opcode, i, ops) when opcode == 5 do
+  def execute(program, opcode, i, opts) when opcode == 5 do
     {should_jump, destination} = calculate_ops(program, i)
 
     next_pos =
@@ -67,12 +67,12 @@ defmodule Spaceship.Component.IntcodeMachine do
         destination
       end
 
-    if ops[:is_debug],
+    if opts[:is_debug],
       do: {program, next_pos},
-      else: execute(program, opcode_for(program[next_pos]), next_pos, ops)
+      else: execute(program, opcode_for(program[next_pos]), next_pos, opts)
   end
 
-  def execute(program, opcode, i, ops) when opcode == 6 do
+  def execute(program, opcode, i, opts) when opcode == 6 do
     {should_jump, destination} = calculate_ops(program, i)
 
     next_pos =
@@ -82,12 +82,12 @@ defmodule Spaceship.Component.IntcodeMachine do
         i + 3
       end
 
-    if ops[:is_debug],
+    if opts[:is_debug],
       do: {program, next_pos},
-      else: execute(program, opcode_for(program[next_pos]), next_pos, ops)
+      else: execute(program, opcode_for(program[next_pos]), next_pos, opts)
   end
 
-  def execute(program, opcode, i, ops) when opcode == 7 do
+  def execute(program, opcode, i, opts) when opcode == 7 do
     next_pos = i + 4
     {first_op, second_op} = calculate_ops(program, i)
 
@@ -98,12 +98,12 @@ defmodule Spaceship.Component.IntcodeMachine do
         Map.put(program, program[i + 3], 0)
       end
 
-    if ops[:is_debug],
+    if opts[:is_debug],
       do: {updated_program, next_pos},
-      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, ops)
+      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
   end
 
-  def execute(program, opcode, i, ops) when opcode == 8 do
+  def execute(program, opcode, i, opts) when opcode == 8 do
     next_pos = i + 4
     {first_op, second_op} = calculate_ops(program, i)
 
@@ -114,12 +114,12 @@ defmodule Spaceship.Component.IntcodeMachine do
         Map.put(program, program[i + 3], 0)
       end
 
-    if ops[:is_debug],
+    if opts[:is_debug],
       do: {updated_program, next_pos},
-      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, ops)
+      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
   end
 
-  def execute(program, opcode, _i, _ops) when opcode == 99 do
+  def execute(program, opcode, _i, _opts) when opcode == 99 do
     program[0]
   end
 
