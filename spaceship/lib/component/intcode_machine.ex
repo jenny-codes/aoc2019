@@ -34,9 +34,8 @@ defmodule Spaceship.Component.IntcodeMachine do
 
   def execute(program, opcode, i, opts) when opcode == 3 do
     next_pos = i + 2
-    [input | input_args] = opts[:input_args]
-    updated_opts = Keyword.put(opts, :input_args, input_args)
-    updated_program = Map.put(program, program[i + 1], input)
+    {input_val, updated_opts} = opts[:input_fn].(opts)
+    updated_program = Map.put(program, program[i + 1], input_val)
 
     if opts[:is_debug],
       do: {updated_program, next_pos},

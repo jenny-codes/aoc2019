@@ -6,14 +6,6 @@ defmodule Spaceship.PuzzlesTest do
   #   assert Spaceship.Puzzles.day_05(input: 1) == expected_answer
   # end
 
-  test "day_05 case 1" do
-    ret_value = "3,3,1108,-1,8,3,4,3,99"
-    |> Spaceship.Component.IntcodeMachine.build_program()
-    |> Spaceship.Component.IntcodeMachine.execute(input_args: [8])
-
-    assert ret_value == 1
-  end
-
   test "day_05 part 2" do
     assert Spaceship.Puzzles.day_05(input: 5) == 11_460_760
   end

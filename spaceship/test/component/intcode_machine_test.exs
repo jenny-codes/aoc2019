@@ -29,12 +29,14 @@ defmodule Spaceship.Component.IntcodeMachineTest do
     assert program == "1102,100,200,20000"
   end
 
-  test 'opcode 3 executes the passed-in :input_fn function' do
-    assert true
-  end
+  test 'opcode 3 gets input from :input_fn and updates to the location 1st param points to' do
+    input_fn = fn opts ->
+      [input_val | updated_input_args] = opts[:input_args]
+      {input_val, Keyword.put(opts, :input_args, updated_input_args)}
+    end
 
-  test 'opcode 3 reads an input and update to the location 1st param points to' do
-    {program, next_pos} = execute_intcode_machine("1103,0", input_args: [10000])
+    {program, next_pos} =
+      execute_intcode_machine("1103,0", input_fn: input_fn, input_args: [10000])
 
     assert next_pos == 2
     assert program == "10000,0"

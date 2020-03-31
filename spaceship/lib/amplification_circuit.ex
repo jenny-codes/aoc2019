@@ -34,8 +34,17 @@ defmodule Spaceship.AmplificationCircuit do
   end
 
   def execute_program_in_sequence(program, sequence) do
+    input_fn = fn opts ->
+      [input_val | updated_input_args] = opts[:input_args]
+      {input_val, Keyword.put(opts, :input_args, updated_input_args)}
+    end
+
     Enum.reduce(sequence, 0, fn cur, previous_output ->
-      Spaceship.Component.IntcodeMachine.execute(program, input_args: [cur, previous_output])
+      Spaceship.Component.IntcodeMachine.execute(
+        program,
+        input_fn: input_fn,
+        input_args: [cur, previous_output]
+      )
     end)
   end
 
