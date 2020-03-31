@@ -42,11 +42,13 @@ defmodule Spaceship.Component.IntcodeMachineTest do
     assert program == "10000,0"
   end
 
-  test 'opcode 4 returns the value of 1st param' do
+  test 'opcode 4 gets instruction from :output_fn with the value of 1st param' do
+    output_fn = fn -> :return end
+
     ret_value =
       "1104,10000"
       |> Spaceship.Component.IntcodeMachine.build_program()
-      |> Spaceship.Component.IntcodeMachine.execute()
+      |> Spaceship.Component.IntcodeMachine.execute(output_fn: output_fn)
 
     assert ret_value == 10000
   end

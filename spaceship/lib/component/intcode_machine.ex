@@ -48,12 +48,20 @@ defmodule Spaceship.Component.IntcodeMachine do
         )
   end
 
-  def execute(program, opcode, i, _opts) when opcode == 4 do
-    {value, _} = calculate_ops(program, i)
-    value
-    # next_pos = i + 2
-    # next_opcode = opcode_for(program[next_pos])
-    # execute(program, next_pos, next_opcode, input_args)
+  def execute(program, opcode, i, opts) when opcode == 4 do
+    {output_val, _} = calculate_ops(program, i)
+
+    case opts[:output_fn].() do
+      :return ->
+        output_val
+
+      :continue ->
+        next_pos = i + 2
+        execute(program, next_pos, opcode_for(program[next_pos]), opts)
+
+      _ ->
+        raise "output_fn should return either :return or :continue"
+    end
   end
 
   def execute(program, opcode, i, opts) when opcode == 5 do

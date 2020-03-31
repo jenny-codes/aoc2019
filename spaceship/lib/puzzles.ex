@@ -5,9 +5,15 @@ defmodule Spaceship.Puzzles do
       {input_val, Keyword.put(opts, :input_args, updated_input_args)}
     end
 
+    output_fn = fn -> :return end
+
     File.read!('../input/day_05.txt')
-    |> Spaceship.Component.IntcodeMachine.build_program
-    |> Spaceship.Component.IntcodeMachine.execute(input_fn: input_fn, input_args: [input])
+    |> Spaceship.Component.IntcodeMachine.build_program()
+    |> Spaceship.Component.IntcodeMachine.execute(
+      input_fn: input_fn,
+      input_args: [input],
+      output_fn: output_fn
+    )
   end
 
   def day_07 do

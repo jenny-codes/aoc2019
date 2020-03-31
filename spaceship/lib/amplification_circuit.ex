@@ -39,11 +39,14 @@ defmodule Spaceship.AmplificationCircuit do
       {input_val, Keyword.put(opts, :input_args, updated_input_args)}
     end
 
+    output_fn = fn -> :return end
+
     Enum.reduce(sequence, 0, fn cur, previous_output ->
       Spaceship.Component.IntcodeMachine.execute(
         program,
         input_fn: input_fn,
-        input_args: [cur, previous_output]
+        input_args: [cur, previous_output],
+        output_fn: output_fn
       )
     end)
   end
