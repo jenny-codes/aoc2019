@@ -9,7 +9,7 @@ defmodule Spaceship.PuzzlesTest do
   test "day_05 case 1" do
     ret_value = "3,3,1108,-1,8,3,4,3,99"
     |> Spaceship.Component.IntcodeMachine.build_program()
-    |> Spaceship.Component.IntcodeMachine.execute(%{input_args: [8]})
+    |> Spaceship.Component.IntcodeMachine.execute(input_args: [8])
 
     assert ret_value == 1
   end

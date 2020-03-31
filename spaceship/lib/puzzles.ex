@@ -2,7 +2,7 @@ defmodule Spaceship.Puzzles do
   def day_05(input: input) do
     File.read!('../input/day_05.txt')
     |> Spaceship.Component.IntcodeMachine.build_program
-    |> Spaceship.Component.IntcodeMachine.execute(%{input_args: [input]})
+    |> Spaceship.Component.IntcodeMachine.execute(input_args: [input])
   end
 
   def day_07 do
