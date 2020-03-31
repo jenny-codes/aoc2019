@@ -23,17 +23,17 @@ defmodule Spaceship.AmplificationCircuitTest do
       {pid, _name} = Spaceship.AmplificationCircuit.init_amplifier({1, 0}, 2)
 
       # There should be two items in the inbox: phase_setting (1) and initial_input (2)
-      assert Spaceship.Component.Amplifier.check_signal(pid) == 1
-      assert Spaceship.Component.Amplifier.check_signal(pid) == 2
-      assert Spaceship.Component.Amplifier.check_signal(pid) == :no_signal
+      assert Spaceship.Server.Amplifier.check_signal(pid) == 1
+      assert Spaceship.Server.Amplifier.check_signal(pid) == 2
+      assert Spaceship.Server.Amplifier.check_signal(pid) == :no_signal
     end
 
     test "when index != 0 returns an Amplifier without initial input signal" do
       {pid, _name} = Spaceship.AmplificationCircuit.init_amplifier({3, 1}, 2)
 
       # There should be only one item in the inbox: phase_setting (3)
-      assert Spaceship.Component.Amplifier.check_signal(pid) == 3
-      assert Spaceship.Component.Amplifier.check_signal(pid) == :no_signal
+      assert Spaceship.Server.Amplifier.check_signal(pid) == 3
+      assert Spaceship.Server.Amplifier.check_signal(pid) == :no_signal
     end
   end
 
@@ -63,8 +63,8 @@ defmodule Spaceship.AmplificationCircuitTest do
     test "passes intial_input to the first Amplifier" do
       [{pid, _amp_name}] = Spaceship.AmplificationCircuit.init("1", "initial_input")
 
-      assert Spaceship.Component.Amplifier.check_signal(pid) == 1
-      assert Spaceship.Component.Amplifier.check_signal(pid) == "initial_input"
+      assert Spaceship.Server.Amplifier.check_signal(pid) == 1
+      assert Spaceship.Server.Amplifier.check_signal(pid) == "initial_input"
     end
   end
 end

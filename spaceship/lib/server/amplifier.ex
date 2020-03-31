@@ -1,4 +1,4 @@
-defmodule Spaceship.Component.Amplifier do
+defmodule Spaceship.Server.Amplifier do
   use GenServer, restart: :transient
 
   # ----------------------------------------------
@@ -57,9 +57,10 @@ defmodule Spaceship.Component.Amplifier do
 
   @impl true
   def handle_cast({:run, program_str}, state) do
-    ret_value = program_str
-    |> Spaceship.Component.IntcodeMachine.build_program()
-    |> Spaceship.Component.IntcodeMachine.execute(%{use_signal: true})
+    ret_value =
+      program_str
+      |> Spaceship.Component.IntcodeMachine.build_program()
+      |> Spaceship.Component.IntcodeMachine.execute(%{use_signal: true})
 
     {:noreply, state}
   end

@@ -12,7 +12,7 @@ defmodule Spaceship.AmplificationCircuit do
       DynamicSupervisor.start_child(
         Spaceship.AmplifierSupervisor,
         {
-          Spaceship.Component.Amplifier,
+          Spaceship.Server.Amplifier,
           inbox: [phase_setting, initial_input], name: via_tuple(amp_name(index))
         }
       )
@@ -25,7 +25,7 @@ defmodule Spaceship.AmplificationCircuit do
       DynamicSupervisor.start_child(
         Spaceship.AmplifierSupervisor,
         {
-          Spaceship.Component.Amplifier,
+          Spaceship.Server.Amplifier,
           inbox: [phase_setting], name: via_tuple(amp_name(index))
         }
       )
