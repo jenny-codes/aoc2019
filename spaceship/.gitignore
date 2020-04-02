@@ -27,3 +27,5 @@ spaceship-*.tar
 
 # vscode setting
 settings.json
+
+playground.ex
