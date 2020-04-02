@@ -51,7 +51,7 @@ defmodule Spaceship.Component.IntcodeMachine do
   def execute(program, opcode, i, opts) when opcode == 4 do
     {output_val, _} = calculate_ops(program, i)
 
-    case opts[:output_fn].() do
+    case opts[:output_fn].(output_val) do
       :return ->
         output_val
 

@@ -43,7 +43,7 @@ defmodule Spaceship.Component.IntcodeMachineTest do
   end
 
   test 'opcode 4 gets instruction from :output_fn with the value of 1st param' do
-    output_fn = fn -> :return end
+    output_fn = fn(_val) -> :return end
 
     ret_value =
       "1104,10000"
