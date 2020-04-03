@@ -1,10 +1,6 @@
 defmodule Spaceship.Component.IntcodeMachine do
   def build_program(input_str) do
-    input_str
-    |> String.split(",", trim: true)
-    |> Stream.map(&String.to_integer/1)
-    |> Stream.with_index()
-    |> Map.new(fn {x, i} -> {i, x} end)
+    Spaceship.Util.str_sequence_into_index_map(input_str)
   end
 
   def execute(program, opts \\ []) do
@@ -131,11 +127,7 @@ defmodule Spaceship.Component.IntcodeMachine do
   end
 
   def deconstruct(program) do
-    program
-    |> Map.keys()
-    |> Enum.sort()
-    |> Enum.map(&program[&1])
-    |> Enum.join(",")
+    Spaceship.Util.index_map_into_str_sequence(program)
   end
 
   defp calculate_ops(program, i) do

@@ -10,4 +10,39 @@ defmodule Spaceship.UtilTest do
     assert length(Spaceship.Util.permutations([1, 2])) == 2
     assert length(Spaceship.Util.permutations([1, 2, 3])) == 6
   end
+
+  test "str_sequence_into_index_map with default comma delimiter" do
+    str_sequence = "1,2,3"
+    expected_output = %{0 => 1, 1 => 2, 2 => 3}
+
+    assert Spaceship.Util.str_sequence_into_index_map(str_sequence) == expected_output
+  end
+
+  test "str_sequence_into_index_map removes whitespaces in the result" do
+    str_sequence = "1, 2, 3 "
+    expected_output = %{0 => 1, 1 => 2, 2 => 3}
+
+    assert Spaceship.Util.str_sequence_into_index_map(str_sequence) == expected_output
+  end
+
+  test "str_sequence_into_index_map with delimiter specified" do
+    str_sequence = "1 2 3"
+    expected_output = %{0 => 1, 1 => 2, 2 => 3}
+
+    assert Spaceship.Util.str_sequence_into_index_map(str_sequence, " ") == expected_output
+  end
+
+  test "index_map_into_str_sequence with default comma delimiter" do
+    index_map = %{0 => 1, 1 => 2, 2 => 3}
+    expected_output = "1,2,3"
+
+    assert Spaceship.Util.index_map_into_str_sequence(index_map), expected_output
+  end
+
+  test "index_map_into_str_sequence with delimiter specified" do
+    index_map = %{0 => 1, 1 => 2, 2 => 3}
+    expected_output = "1 2 3"
+
+    assert Spaceship.Util.index_map_into_str_sequence(index_map, " "), expected_output
+  end
 end
