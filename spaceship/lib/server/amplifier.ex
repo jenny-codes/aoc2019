@@ -1,5 +1,8 @@
 defmodule Spaceship.Server.Amplifier do
   use GenServer, restart: :transient
+  # TODO: if Amplifier should be refactored into Program?
+  # because Amplifier is just one kind of program...
+  # TODO: properly exit the process when finished.
 
   # ----------------------------------------------
   # Client API
@@ -10,7 +13,7 @@ defmodule Spaceship.Server.Amplifier do
   def start_link(opts \\ []) do
     GenServer.start_link(
       __MODULE__,
-      %{inbox: opts[:inbox] || []},
+      %{inbox: opts[:inbox] || [], task_ref: nil, task_status: nil},
       opts
     )
   end
@@ -59,6 +62,12 @@ defmodule Spaceship.Server.Amplifier do
   end
 
   @impl true
+  def handle_call({:send_signal, signal}, _from, %{task_status: :finished} = state) do
+    IO.puts("[debug] final signal: #{signal}")
+    {:reply, :ok, %{state | inbox: [signal]}}
+  end
+
+  @impl true
   def handle_call({:send_signal, signal}, _from, %{inbox: inbox} = state) do
     {:reply, :ok, %{state | inbox: inbox ++ [signal]}}
   end
@@ -70,26 +79,26 @@ defmodule Spaceship.Server.Amplifier do
     {:reply, :ok, Map.put(state, :task_ref, task.ref)}
   end
 
-  @impl true
-  def handle_call(:check_result, _from, %{return_value: return_value} = state) do
-    {:reply, return_value, state}
+  def handle_call(:check_result, _from, %{task_status: :finished} = state) do
+    {:reply, :finished, state}
   end
 
+  @impl true
   def handle_call(:check_result, _from, state) do
     {:reply, :no_result, state}
   end
 
   @impl true
-  def handle_info({task_ref, return_value}, %{task_ref: task_ref} = state) do
+  def handle_info({task_ref, :ok}, %{task_ref: task_ref} = state) do
     # We don't care about the DOWN message now, so we demonitor and flush it
     Process.demonitor(task_ref, [:flush])
-    {:noreply, Map.put(state, :return_value, return_value)}
+    {:noreply, %{state | task_status: :finished}}
   end
 
   @impl true
   def handle_info({:DOWN, ref, :process, _pid, reason}, %{task_ref: ref} = state) do
-    IO.puts("A task down. Reason: #{reason}")
-    {:noreply, %{state | ref: nil}}
+    IO.inspect(reason, label: "A task down: ")
+    {:noreply, %{state | ref: nil, task_status: :error}}
   end
 
   def run_program_in_task(program_str, opts) do

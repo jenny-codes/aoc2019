@@ -45,4 +45,12 @@ defmodule Spaceship.UtilTest do
 
     assert Spaceship.Util.index_map_into_str_sequence(index_map, " "), expected_output
   end
+
+  test "next_in_list returns the next item in a list" do
+    list = [1, 2, 3]
+
+    assert Spaceship.Util.next_in_list(list, 1) == 2
+    assert Spaceship.Util.next_in_list(list, 2) == 3
+    assert Spaceship.Util.next_in_list(list, 3) == 1
+  end
 end

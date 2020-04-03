@@ -53,7 +53,7 @@ defmodule Spaceship.Component.IntcodeMachine do
 
       :continue ->
         next_pos = i + 2
-        execute(program, next_pos, opcode_for(program[next_pos]), opts)
+        execute(program, opcode_for(program[next_pos]), next_pos, opts)
 
       _ ->
         raise "output_fn should return either :return or :continue"
@@ -122,8 +122,8 @@ defmodule Spaceship.Component.IntcodeMachine do
       else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
   end
 
-  def execute(program, opcode, _i, _opts) when opcode == 99 do
-    program[0]
+  def execute(_program, opcode, _i, _opts) when opcode == 99 do
+    :ok
   end
 
   def deconstruct(program) do

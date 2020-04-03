@@ -109,13 +109,13 @@ defmodule Spaceship.Component.IntcodeMachineTest do
     assert next_pos == 4
   end
 
-  test 'opcode 99 returns the 1st value of program' do
+  test 'opcode 99 returns :ok' do
     ret_value =
       "99"
       |> Spaceship.Component.IntcodeMachine.build_program()
       |> Spaceship.Component.IntcodeMachine.execute()
 
-    assert ret_value == 99
+    assert ret_value == :ok
   end
 
   def execute_intcode_machine(program_str, opts \\ %{}) do

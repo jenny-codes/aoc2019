@@ -21,4 +21,16 @@ defmodule Spaceship.Util do
     |> Enum.map(&index_map[&1])
     |> Enum.join(delimiter)
   end
+
+  def next_in_list(list, item) do
+    next_item(list ++ [hd(list)], item)
+  end
+
+  defp next_item([head | tail], item) when head == item do
+    hd(tail)
+  end
+
+  defp next_item([_head | tail], item) do
+    next_item(tail, item)
+  end
 end

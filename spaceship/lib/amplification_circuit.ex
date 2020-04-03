@@ -1,68 +1,86 @@
 defmodule Spaceship.AmplificationCircuit do
-  # INITIAL_INPUT = 0
-
   def init(phase_setting_sequence, initial_input) do
     phase_setting_sequence
-    |> normalize_with_index
-    |> Enum.map(&Spaceship.AmplificationCircuit.init_amplifier(&1, initial_input))
+    |> Spaceship.Util.str_sequence_into_index_map()
+    |> Enum.map(&init_amplifier(&1, initial_input))
   end
 
-  def init_amplifier({phase_setting, index}, initial_input) when index == 0 do
+  def run(amp_list, program_str) do
+    amp_list
+    |> Enum.map(&run_amplifier(&1, program_str, amp_list))
+    |> Enum.each(fn {:ok, amp} -> await_finish(amp) end)
+
+    # The final output is sent to the first amplifier, so we check its inbox again
+    # to get the value and return.
+    Enum.at(amp_list, 0)
+    |> Spaceship.Server.Amplifier.check_signal()
+  end
+
+  def init_amplifier({index, phase_setting}, initial_input) when index == 0 do
     {:ok, pid} =
       DynamicSupervisor.start_child(
         Spaceship.AmplifierSupervisor,
-        {
-          Spaceship.Server.Amplifier,
-          inbox: [phase_setting, initial_input], name: via_tuple(amp_name(index))
-        }
+        {Spaceship.Server.Amplifier, inbox: [phase_setting, initial_input]}
       )
 
-    {pid, amp_name(index)}
+    pid
   end
 
-  def init_amplifier({phase_setting, index}, _initial_input) do
+  def init_amplifier({_index, phase_setting}, _initial_input) do
     {:ok, pid} =
       DynamicSupervisor.start_child(
         Spaceship.AmplifierSupervisor,
-        {
-          Spaceship.Server.Amplifier,
-          inbox: [phase_setting], name: via_tuple(amp_name(index))
-        }
+        {Spaceship.Server.Amplifier, inbox: [phase_setting]}
       )
 
-    {pid, amp_name(index)}
+    pid
   end
 
-  def execute_program_in_sequence(program, sequence) do
+  def run_amplifier(amp, program_str, amp_list) do
     input_fn = fn opts ->
-      [input_val | updated_input_args] = opts[:input_args]
-      {input_val, Keyword.put(opts, :input_args, updated_input_args)}
+      {await_signal(amp), opts}
     end
 
-    output_fn = fn(_val) -> :return end
+    output_fn = fn output_val ->
+      Spaceship.Server.Amplifier.send_signal(next_amp_for(amp, amp_list), output_val)
+      :continue
+    end
 
-    Enum.reduce(sequence, 0, fn cur, previous_output ->
-      Spaceship.Component.IntcodeMachine.execute(
-        program,
+    # Start the async task
+    run_status =
+      Spaceship.Server.Amplifier.run(
+        amp,
+        program_str,
         input_fn: input_fn,
-        input_args: [cur, previous_output],
         output_fn: output_fn
       )
-    end)
+
+    {run_status, amp}
   end
 
-  defp amp_name(index) do
-    "amp_#{index}"
+  def await_finish(amp) do
+    case Spaceship.Server.Amplifier.check_result(amp) do
+      :no_result ->
+        Process.sleep(100)
+        await_finish(amp)
+
+      :finished ->
+        :ok
+    end
   end
 
-  defp via_tuple(name) do
-    {:via, Registry, {Spaceship.AmplifierRegistry, name}}
+  defp next_amp_for(current_amp, amp_list) do
+    Spaceship.Util.next_in_list(amp_list, current_amp)
   end
 
-  defp normalize_with_index(str) do
-    str
-    |> String.split(",", trim: true)
-    |> Stream.map(&String.to_integer/1)
-    |> Stream.with_index()
+  defp await_signal(amp) do
+    case Spaceship.Server.Amplifier.check_signal(amp) do
+      :no_signal ->
+        Process.sleep(100)
+        await_signal(amp)
+
+      value ->
+        value
+    end
   end
 end

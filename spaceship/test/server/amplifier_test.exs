@@ -2,6 +2,7 @@ defmodule Spaceship.Server.AmplifierTest do
   use ExUnit.Case, async: true
 
   setup do
+    # TODO: find a proper way to reset supervisors in tests
     Supervisor.terminate_child(Spaceship.Supervisor, Spaceship.RunProgramTaskSupervisor)
     Supervisor.restart_child(Spaceship.Supervisor, Spaceship.RunProgramTaskSupervisor)
     :ok
@@ -63,7 +64,7 @@ defmodule Spaceship.Server.AmplifierTest do
 
       # 99 on IntcodeMachine should return immediately with 99
       assert result == :ok
-      assert Spaceship.Server.Amplifier.check_result(amp) == 99
+      assert Spaceship.Server.Amplifier.check_result(amp) == :finished
     end
 
     test "runs the given program with options on IntcodeMachine" do
@@ -75,7 +76,7 @@ defmodule Spaceship.Server.AmplifierTest do
       # which will be the return value when 99 is reached.
       Spaceship.Server.Amplifier.run(amp, "3,0,99", input_fn: input_fn)
 
-      assert Spaceship.Server.Amplifier.check_result(amp) == 333
+      assert Spaceship.Server.Amplifier.check_result(amp) == :finished
     end
 
     test "provides input values from inbox when specified" do
@@ -87,7 +88,15 @@ defmodule Spaceship.Server.AmplifierTest do
 
       Spaceship.Server.Amplifier.run(amp, "3,0,99", input_fn: input_fn)
 
-      assert ensure_result(amp) == 333
+      assert ensure_result(amp) == :finished
+    end
+  end
+
+  describe "check_result/1" do
+    test "returns :no_signal when no result yet" do
+      {:ok, amp} = Spaceship.Server.Amplifier.start_link()
+
+      assert Spaceship.Server.Amplifier.check_result(amp) == :no_result
     end
   end
 

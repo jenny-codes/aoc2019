@@ -9,7 +9,6 @@ defmodule Spaceship.Supervisor do
   def init(:ok) do
     children = [
       {Task.Supervisor, name: Spaceship.RunProgramTaskSupervisor},
-      {Registry, name: Spaceship.AmplifierRegistry, keys: :unique},
       {DynamicSupervisor, name: Spaceship.AmplifierSupervisor, strategy: :one_for_one}
     ]
 
