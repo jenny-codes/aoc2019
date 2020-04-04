@@ -1,3 +1,5 @@
+ExUnit.start()
+
 defmodule Spaceship.PuzzlesTest do
   use ExUnit.Case
 
@@ -74,5 +76,19 @@ defmodule Spaceship.PuzzlesTest do
     |> Enum.max()
   end
     assert Spaceship.Puzzles.play == 2
+  end
+
+  describe "day 08" do
+    test "part 1" do
+      File.read!('puzzles/input/day_08.txt')
+      |> Spaceship.Puzzles.day08_1({25, 6})
+      |> IO.puts()
+    end
+
+    test "part 2" do
+      File.read!('puzzles/input/day_08.txt')
+      |> Spaceship.Puzzles.day08_2({25, 6})
+      |> IO.puts()
+    end
   end
 end

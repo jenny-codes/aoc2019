@@ -21,4 +21,21 @@ defmodule Spaceship.Puzzles do
     |> Spaceship.AmplificationCircuit.init(0)
     |> Spaceship.AmplificationCircuit.run(program_str)
   end
+
+  def day08_1(pixel_str, image_size) do
+    pixel_str
+    |> Spaceship.Component.SpaceImageFormat.from_pixel_str(image_size)
+    |> Enum.map(&Spaceship.Util.count_items/1)
+    |> Enum.min_by(& &1[0])
+    |> (fn x -> x[1] * x[2] end).()
+  end
+
+  def day08_2(pixel_str, image_size) do
+    pixel_str
+    |> Spaceship.Component.SpaceImageFormat.from_pixel_str(image_size)
+    |> Enum.zip()
+    |> Enum.map(&Tuple.to_list/1)
+    |> Spaceship.Component.SpaceImageFormat.parse_image_color()
+    |> Spaceship.Component.SpaceImageFormat.print_image(image_size)
+  end
 end
