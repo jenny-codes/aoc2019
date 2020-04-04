@@ -1,5 +1,14 @@
 defmodule Spaceship.PuzzlesTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
+
+  setup do
+    # TODO: find a proper way to reset supervisors in tests
+    Supervisor.terminate_child(Spaceship.Supervisor, Spaceship.AmplifierSupervisor)
+    Supervisor.restart_child(Spaceship.Supervisor, Spaceship.AmplifierSupervisor)
+    Supervisor.terminate_child(Spaceship.Supervisor, Spaceship.RunProgramTaskSupervisor)
+    Supervisor.restart_child(Spaceship.Supervisor, Spaceship.RunProgramTaskSupervisor)
+    :ok
+  end
 
   # test "day_05 part 1" do
   #   expected_answer = 13_294_380
@@ -45,5 +54,25 @@ defmodule Spaceship.PuzzlesTest do
       |> Spaceship.AmplificationCircuit.execute_program_in_sequence(sequence)
 
     assert output == 65210
+  end
+
+  test "day_07_2 case 1" do
+    sequence = "9,8,7,6,5"
+    program_str = "3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5"
+
+    output = Spaceship.Puzzles.day_07_2(sequence, program_str)
+
+    assert output == 139_629_729
+  end
+
+  test "day07 real" do
+    program_str = File.read!('input/day_07.txt')
+
+    [5, 6, 7, 8, 9]
+    |> Spaceship.Util.permutations()
+    |> Enum.map(&day_07_2(Enum.join(&1, ","), program_str))
+    |> Enum.max()
+  end
+    assert Spaceship.Puzzles.play == 2
   end
 end
