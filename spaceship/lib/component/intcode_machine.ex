@@ -3,14 +3,15 @@ defmodule Spaceship.Component.IntcodeMachine do
     Spaceship.Util.str_sequence_into_index_map(input_str)
   end
 
+  @spec execute(map, keyword) :: any
   def execute(program, opts \\ []) do
-    execute(program, opcode_for(program[0]), 0, opts)
+    execute(program, opcode_for(program[0]), 0, Keyword.put_new(opts, :relative_base, 0))
   end
 
   @spec execute(map, number, number, keyword) :: any
   def execute(program, opcode, pos, opts) when opcode == 1 do
     next_pos = pos + 4
-    {first_op, second_op} = params_for(program, pos)
+    {first_op, second_op} = params_for(program, pos, opts[:relative_base])
     updated_program = Map.put(program, program[pos + 3], first_op + second_op)
 
     if opts[:is_debug],
@@ -20,7 +21,7 @@ defmodule Spaceship.Component.IntcodeMachine do
 
   def execute(program, opcode, pos, opts) when opcode == 2 do
     next_pos = pos + 4
-    {first_op, second_op} = params_for(program, pos)
+    {first_op, second_op} = params_for(program, pos, opts[:relative_base])
     updated_program = Map.put(program, program[pos + 3], first_op * second_op)
 
     if opts[:is_debug],
@@ -45,7 +46,7 @@ defmodule Spaceship.Component.IntcodeMachine do
   end
 
   def execute(program, opcode, pos, opts) when opcode == 4 do
-    {output_val, _} = params_for(program, pos)
+    output_val = param_for(program, pos, opts[:relative_base])
 
     case opts[:output_fn].(output_val) do
       :return ->
@@ -61,7 +62,7 @@ defmodule Spaceship.Component.IntcodeMachine do
   end
 
   def execute(program, opcode, pos, opts) when opcode == 5 do
-    {should_jump, destination} = params_for(program, pos)
+    {should_jump, destination} = params_for(program, pos, opts[:relative_base])
 
     next_pos =
       if should_jump == 0 do
@@ -76,7 +77,7 @@ defmodule Spaceship.Component.IntcodeMachine do
   end
 
   def execute(program, opcode, pos, opts) when opcode == 6 do
-    {should_jump, destination} = params_for(program, pos)
+    {should_jump, destination} = params_for(program, pos, opts[:relative_base])
 
     next_pos =
       if should_jump == 0 do
@@ -92,7 +93,7 @@ defmodule Spaceship.Component.IntcodeMachine do
 
   def execute(program, opcode, pos, opts) when opcode == 7 do
     next_pos = pos + 4
-    {first_op, second_op} = params_for(program, pos)
+    {first_op, second_op} = params_for(program, pos, opts[:relative_base])
 
     updated_program =
       if first_op < second_op do
@@ -108,7 +109,7 @@ defmodule Spaceship.Component.IntcodeMachine do
 
   def execute(program, opcode, pos, opts) when opcode == 8 do
     next_pos = pos + 4
-    {first_op, second_op} = params_for(program, pos)
+    {first_op, second_op} = params_for(program, pos, opts[:relative_base])
 
     updated_program =
       if first_op == second_op do
@@ -122,6 +123,16 @@ defmodule Spaceship.Component.IntcodeMachine do
       else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
   end
 
+  def execute(program, opcode, pos, opts) when opcode == 9 do
+    next_pos = pos + 2
+    adjustment = param_for(program, pos, opts[:relative_base])
+    updated_ops = Keyword.put(opts, :relative_base, opts[:relative_base] + adjustment)
+
+    if opts[:is_debug],
+      do: {program, next_pos, updated_ops},
+      else: execute(program, opcode_for(program[next_pos]), next_pos, updated_ops)
+  end
+
   def execute(_program, opcode, _i, _opts) when opcode == 99 do
     :ok
   end
@@ -130,19 +141,31 @@ defmodule Spaceship.Component.IntcodeMachine do
     Spaceship.Util.index_map_into_str_sequence(program)
   end
 
-  defp params_for(program, pos) do
-    case div(program[pos], 100) do
-      0 ->
-        {program[program[pos + 1]], program[program[pos + 2]]}
+  defp param_for(program, pos, relative_base) do
+    fetch_param(program, program[pos + 1], div(program[pos], 100), relative_base)
+  end
 
-      1 ->
-        {program[pos + 1], program[program[pos + 2]]}
+  defp params_for(program, pos, relative_base) do
 
-      10 ->
-        {program[program[pos + 1]], program[pos + 2]}
+    program[pos]
+    |> div(100)
+    |> (fn x -> {div(x, 10), rem(x, 10)} end).()
+    |> (fn {first_mode, second_mode} ->
+          {
+            fetch_param(program, program[pos + 1], first_mode, relative_base),
+            fetch_param(program, program[pos + 2], second_mode, relative_base)
+          }
+        end).()
+  end
 
-      11 ->
-        {program[pos + 1], program[pos + 2]}
+  # 0 => position mode
+  # 1 => immdeiate mode
+  # 2 => relative mode
+  defp fetch_param(program, value, mode, relative_base) do
+    case mode do
+      0 -> program[value]
+      1 -> value
+      2 -> program[value + relative_base]
     end
   end
 

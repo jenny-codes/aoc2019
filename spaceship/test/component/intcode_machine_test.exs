@@ -109,6 +109,16 @@ defmodule Spaceship.Component.IntcodeMachineTest do
     assert next_pos == 4
   end
 
+  test 'opcode 9 updates :relative_base with 1st param' do
+    {_program, next_pos, opts} =
+      "109,333"
+      |> Spaceship.Component.IntcodeMachine.build_program()
+      |> Spaceship.Component.IntcodeMachine.execute(is_debug: true)
+
+    assert next_pos == 2
+    assert opts[:relative_base] == 333
+  end
+
   test 'opcode 99 returns :ok' do
     ret_value =
       "99"
@@ -118,7 +128,59 @@ defmodule Spaceship.Component.IntcodeMachineTest do
     assert ret_value == :ok
   end
 
-  def execute_intcode_machine(program_str, opts \\ %{}) do
+  describe "relative mode returns pointed value with position adjusted with :relative_base" do
+    test "no adjustments with default relative base" do
+      {program, next_pos} = execute_intcode_machine("2201,3,3,3")
+
+      assert next_pos == 4
+      assert program == "2201,3,3,6"
+    end
+
+    test "positive adjustment with positive :relative_base" do
+      {program, next_pos} = execute_intcode_machine("2201,2,2,3", relative_base: 1)
+
+      assert next_pos == 4
+      assert program == "2201,2,2,6"
+    end
+
+    test "positive adjustment with negative :relative_base" do
+      {program, next_pos} = execute_intcode_machine("2201,4,4,3", relative_base: -1)
+
+      assert next_pos == 4
+      assert program == "2201,4,4,6"
+    end
+
+    test "for opcode with one param" do
+      output_fn = fn _val -> :return end
+
+      ret_value =
+        "204,1,3"
+        |> Spaceship.Component.IntcodeMachine.build_program()
+        |> Spaceship.Component.IntcodeMachine.execute(output_fn: output_fn, relative_base: 1)
+
+      assert ret_value == 3
+    end
+
+    test "with :relative_base updated from opcode 9" do
+      output_fn = fn _val -> :return end
+
+      ret_value =
+        "209,1,204,1"
+        |> Spaceship.Component.IntcodeMachine.build_program()
+        |> Spaceship.Component.IntcodeMachine.execute(output_fn: output_fn)
+
+      assert ret_value == 204
+    end
+  end
+
+  test "mixed modes work" do
+    {program, next_pos} = execute_intcode_machine("1201,300,4,3", relative_base: -1)
+
+    assert next_pos == 4
+    assert program == "1201,300,4,303"
+  end
+
+  def execute_intcode_machine(program_str, opts \\ []) do
     program_str
     |> Spaceship.Component.IntcodeMachine.build_program()
     |> Spaceship.Component.IntcodeMachine.execute([{:is_debug, true} | opts])
