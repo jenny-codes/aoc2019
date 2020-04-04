@@ -33,4 +33,17 @@ defmodule Spaceship.Util do
   defp next_item([_head | tail], item) do
     next_item(tail, item)
   end
+
+  def count_items(list) do
+    Enum.reduce(list, %{}, fn item, acc ->
+      new_value =
+        if acc[item] do
+          acc[item] + 1
+        else
+          1
+        end
+
+      Map.put(acc, item, new_value)
+    end)
+  end
 end

@@ -53,4 +53,15 @@ defmodule Spaceship.UtilTest do
     assert Spaceship.Util.next_in_list(list, 2) == 3
     assert Spaceship.Util.next_in_list(list, 3) == 1
   end
+
+  test "count_items turns a list into a map with unique values as key and occurances as value" do
+    list = [1, 2, 3, 3, 3, 2]
+    expected_output = %{1 => 1, 2 => 2, 3 => 3}
+
+    assert Spaceship.Util.count_items(list) == expected_output
+  end
+
+  test "count_items returns an empty map given an empty list" do
+    assert Spaceship.Util.count_items([]) == %{}
+  end
 end
