@@ -12,21 +12,45 @@ defmodule Spaceship.Component.IntcodeMachine do
   def execute(program, opcode, pos, opts) when opcode == 1 do
     next_pos = pos + 4
     [first_op_pos, second_op_pos, output_pos] = params_for(program, pos, opts[:relative_base], 3)
-    updated_program = Map.put(program, output_pos, program[first_op_pos] + program[second_op_pos])
+
+    updated_program =
+      Map.put(
+        program,
+        output_pos,
+        value_with_fallback(program, first_op_pos) + value_with_fallback(program, second_op_pos)
+      )
 
     if opts[:is_debug],
       do: {updated_program, next_pos},
-      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
+      else:
+        execute(
+          updated_program,
+          updated_program |> value_with_fallback(next_pos) |> opcode_for(),
+          next_pos,
+          opts
+        )
   end
 
   def execute(program, opcode, pos, opts) when opcode == 2 do
     next_pos = pos + 4
     [first_op_pos, second_op_pos, output_pos] = params_for(program, pos, opts[:relative_base], 3)
-    updated_program = Map.put(program, output_pos, program[first_op_pos] * program[second_op_pos])
+
+    updated_program =
+      Map.put(
+        program,
+        output_pos,
+        value_with_fallback(program, first_op_pos) * value_with_fallback(program, second_op_pos)
+      )
 
     if opts[:is_debug],
       do: {updated_program, next_pos},
-      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
+      else:
+        execute(
+          updated_program,
+          updated_program |> value_with_fallback(next_pos) |> opcode_for(),
+          next_pos,
+          opts
+        )
   end
 
   def execute(program, opcode, pos, opts) when opcode == 3 do
@@ -40,7 +64,7 @@ defmodule Spaceship.Component.IntcodeMachine do
       else:
         execute(
           updated_program,
-          opcode_for(updated_program[next_pos]),
+          updated_program |> value_with_fallback(next_pos) |> opcode_for(),
           next_pos,
           updated_opts
         )
@@ -49,7 +73,7 @@ defmodule Spaceship.Component.IntcodeMachine do
   def execute(program, opcode, pos, opts) when opcode == 4 do
     output_val =
       params_for(program, pos, opts[:relative_base], 1)
-      |> (fn [output_val_pos] -> program[output_val_pos] end).()
+      |> (fn [output_val_pos] -> value_with_fallback(program, output_val_pos) end).()
 
     case opts[:output_fn].(output_val) do
       :return ->
@@ -57,7 +81,13 @@ defmodule Spaceship.Component.IntcodeMachine do
 
       :continue ->
         next_pos = pos + 2
-        execute(program, opcode_for(program[next_pos]), next_pos, opts)
+
+        execute(
+          program,
+          program |> value_with_fallback(next_pos) |> opcode_for(),
+          next_pos,
+          opts
+        )
 
       _ ->
         raise "output_fn should return either :return or :continue"
@@ -67,7 +97,7 @@ defmodule Spaceship.Component.IntcodeMachine do
   def execute(program, opcode, pos, opts) when opcode == 5 do
     [should_jump, destination] =
       params_for(program, pos, opts[:relative_base], 2)
-      |> Enum.map(&program[&1])
+      |> Enum.map(&value_with_fallback(program, &1))
 
     next_pos =
       if should_jump == 0 do
@@ -78,13 +108,19 @@ defmodule Spaceship.Component.IntcodeMachine do
 
     if opts[:is_debug],
       do: {program, next_pos},
-      else: execute(program, opcode_for(program[next_pos]), next_pos, opts)
+      else:
+        execute(
+          program,
+          program |> value_with_fallback(next_pos) |> opcode_for(),
+          next_pos,
+          opts
+        )
   end
 
   def execute(program, opcode, pos, opts) when opcode == 6 do
     [should_jump, destination] =
       params_for(program, pos, opts[:relative_base], 2)
-      |> Enum.map(&program[&1])
+      |> Enum.map(&value_with_fallback(program, &1))
 
     next_pos =
       if should_jump == 0 do
@@ -95,7 +131,13 @@ defmodule Spaceship.Component.IntcodeMachine do
 
     if opts[:is_debug],
       do: {program, next_pos},
-      else: execute(program, opcode_for(program[next_pos]), next_pos, opts)
+      else:
+        execute(
+          program,
+          program |> value_with_fallback(next_pos) |> opcode_for(),
+          next_pos,
+          opts
+        )
   end
 
   def execute(program, opcode, pos, opts) when opcode == 7 do
@@ -103,7 +145,7 @@ defmodule Spaceship.Component.IntcodeMachine do
     [first_op_pos, second_op_pos, output_pos] = params_for(program, pos, opts[:relative_base], 3)
 
     updated_program =
-      if program[first_op_pos] < program[second_op_pos] do
+      if value_with_fallback(program, first_op_pos) < value_with_fallback(program, second_op_pos) do
         Map.put(program, output_pos, 1)
       else
         Map.put(program, output_pos, 0)
@@ -111,7 +153,13 @@ defmodule Spaceship.Component.IntcodeMachine do
 
     if opts[:is_debug],
       do: {updated_program, next_pos},
-      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
+      else:
+        execute(
+          updated_program,
+          updated_program |> value_with_fallback(next_pos) |> opcode_for(),
+          next_pos,
+          opts
+        )
   end
 
   def execute(program, opcode, pos, opts) when opcode == 8 do
@@ -119,7 +167,7 @@ defmodule Spaceship.Component.IntcodeMachine do
     [first_op_pos, second_op_pos, output_pos] = params_for(program, pos, opts[:relative_base], 3)
 
     updated_program =
-      if program[first_op_pos] == program[second_op_pos] do
+      if value_with_fallback(program, first_op_pos) == value_with_fallback(program, second_op_pos) do
         Map.put(program, output_pos, 1)
       else
         Map.put(program, output_pos, 0)
@@ -127,7 +175,13 @@ defmodule Spaceship.Component.IntcodeMachine do
 
     if opts[:is_debug],
       do: {updated_program, next_pos},
-      else: execute(updated_program, opcode_for(updated_program[next_pos]), next_pos, opts)
+      else:
+        execute(
+          updated_program,
+          updated_program |> value_with_fallback(next_pos) |> opcode_for(),
+          next_pos,
+          opts
+        )
   end
 
   def execute(program, opcode, pos, opts) when opcode == 9 do
@@ -135,14 +189,20 @@ defmodule Spaceship.Component.IntcodeMachine do
 
     updated_ops =
       params_for(program, pos, opts[:relative_base], 1)
-      |> (fn [pos] -> program[pos] end).()
+      |> (fn [pos] -> value_with_fallback(program, pos) end).()
       |> (fn adjustment ->
             Keyword.put(opts, :relative_base, opts[:relative_base] + adjustment)
           end).()
 
     if opts[:is_debug],
       do: {program, next_pos, updated_ops},
-      else: execute(program, opcode_for(program[next_pos]), next_pos, updated_ops)
+      else:
+        execute(
+          program,
+          program |> value_with_fallback(next_pos) |> opcode_for(),
+          next_pos,
+          updated_ops
+        )
   end
 
   def execute(_program, opcode, _i, _opts) when opcode == 99 do
@@ -153,14 +213,22 @@ defmodule Spaceship.Component.IntcodeMachine do
     Spaceship.Util.index_map_into_str_sequence(program)
   end
 
-  defp params_for(program, pos, relative_base, arity) do
-    IO.inspect(pos, label: "current position")
+  defp value_with_fallback(program, key) do
+    Map.get(program, key, 0)
+  end
 
-    program[pos]
+  defp params_for(program, pos, relative_base, arity) do
+    program
+    |> value_with_fallback(pos)
     |> div(100)
     |> to_mode_list(arity)
     |> Enum.map(fn {mode_pos, mode} ->
-      fetch_param_location(pos + mode_pos, program[pos + mode_pos], mode, relative_base)
+      fetch_param_location(
+        pos + mode_pos,
+        value_with_fallback(program, pos + mode_pos),
+        mode,
+        relative_base
+      )
     end)
   end
 

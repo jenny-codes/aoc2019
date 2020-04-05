@@ -197,6 +197,12 @@ defmodule Spaceship.Component.IntcodeMachineTest do
     assert program == "2101,300,4,303"
   end
 
+  test "defaults to 0 for out-of-scope positions" do
+    {program, _} = execute_intcode_machine("1001,300,1,3")
+
+    assert program == "1001,300,1,1"
+  end
+
   def execute_intcode_machine(program_str, opts \\ []) do
     program_str
     |> Spaceship.Component.IntcodeMachine.build_program()
