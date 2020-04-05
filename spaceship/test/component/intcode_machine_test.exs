@@ -37,7 +37,7 @@ defmodule Spaceship.Component.IntcodeMachineTest do
       end
 
       {program, next_pos} =
-      execute_intcode_machine("103,0", input_fn: input_fn, input_args: [10000])
+        execute_intcode_machine("3,0", input_fn: input_fn, input_args: [10000])
 
       assert next_pos == 2
       assert program == "10000,0"
@@ -47,9 +47,9 @@ defmodule Spaceship.Component.IntcodeMachineTest do
       output_fn = fn _val -> :return end
 
       ret_value =
-      "104,10000"
-      |> Spaceship.Component.IntcodeMachine.build_program()
-      |> Spaceship.Component.IntcodeMachine.execute(output_fn: output_fn)
+        "104,10000"
+        |> Spaceship.Component.IntcodeMachine.build_program()
+        |> Spaceship.Component.IntcodeMachine.execute(output_fn: output_fn)
 
       assert ret_value == 10000
     end
@@ -112,9 +112,9 @@ defmodule Spaceship.Component.IntcodeMachineTest do
 
     test "opcode 9 updates :relative_base with 1st param" do
       {_program, next_pos, opts} =
-      "109,333"
-      |> Spaceship.Component.IntcodeMachine.build_program()
-      |> Spaceship.Component.IntcodeMachine.execute(is_debug: true)
+        "109,333"
+        |> Spaceship.Component.IntcodeMachine.build_program()
+        |> Spaceship.Component.IntcodeMachine.execute(is_debug: true)
 
       assert next_pos == 2
       assert opts[:relative_base] == 333
@@ -172,6 +172,21 @@ defmodule Spaceship.Component.IntcodeMachineTest do
         |> Spaceship.Component.IntcodeMachine.execute(output_fn: output_fn)
 
       assert ret_value == 204
+    end
+
+    test "supports output instruction for opcode with two params" do
+      {program, next_pos} = execute_intcode_machine("22201,-1,-1,-1", relative_base: 1)
+
+      assert next_pos == 4
+      assert program == "44402,-1,-1,-1"
+    end
+
+    test "supports output instruction for opcode with one param" do
+      input_fn = fn opts -> {333, opts} end
+
+      {program, _} = execute_intcode_machine("203,-1", input_fn: input_fn, relative_base: 1)
+
+      assert program == "333,-1"
     end
   end
 
