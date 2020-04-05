@@ -175,11 +175,11 @@ defmodule Spaceship.Component.IntcodeMachineTest do
     end
   end
 
-  test "mixed modes work" do
-    {program, next_pos} = execute_intcode_machine("1201,300,4,3", relative_base: -1)
+  test "modes should be read right to left" do
+    {program, next_pos} = execute_intcode_machine("2101,300,4,3", relative_base: -1)
 
     assert next_pos == 4
-    assert program == "1201,300,4,303"
+    assert program == "2101,300,4,303"
   end
 
   def execute_intcode_machine(program_str, opts \\ []) do

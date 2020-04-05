@@ -149,7 +149,7 @@ defmodule Spaceship.Component.IntcodeMachine do
 
     program[pos]
     |> div(100)
-    |> (fn x -> {div(x, 10), rem(x, 10)} end).()
+    |> (fn x -> {rem(x, 10), div(x, 10)} end).()
     |> (fn {first_mode, second_mode} ->
           {
             fetch_param(program, program[pos + 1], first_mode, relative_base),
