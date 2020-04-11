@@ -46,7 +46,7 @@ defmodule Spaceship.Puzzles do
     end
 
     output_fn = fn output_val ->
-      IO.inspect output_val, label: "Output value"
+      IO.inspect(output_val, label: "Output value")
       # :return
       :continue
     end
@@ -58,5 +58,15 @@ defmodule Spaceship.Puzzles do
       input_args: [initial_input],
       output_fn: output_fn
     )
+  end
+
+  def day10(asteroid_map_str) do
+    asteroid_map_str
+    |> Spaceship.Component.MonitoringStation.from_input()
+    |> Spaceship.Component.MonitoringStation.draw_directions()
+    # TODO: We can use `for` comprehension to transform a map's value
+    |> Enum.map(fn {ast, dirs} -> {ast, MapSet.size(dirs)} end)
+    |> Enum.max_by(fn {_ast, count} -> count end)
+    |> IO.inspect()
   end
 end

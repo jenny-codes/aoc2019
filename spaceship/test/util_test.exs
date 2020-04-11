@@ -1,6 +1,8 @@
 defmodule Spaceship.UtilTest do
   use ExUnit.Case, async: true
 
+  alias Spaceship.Util
+
   test 'permutations with empty list returns empty nested list' do
     assert Spaceship.Util.permutations([]) == [[]]
   end
@@ -63,5 +65,15 @@ defmodule Spaceship.UtilTest do
 
   test "count_items returns an empty map given an empty list" do
     assert Spaceship.Util.count_items([]) == %{}
+  end
+
+  test "apply_if/3 apply the 3rd param to 1st param if 2nd param is true" do
+    assert Util.apply_if(0, true, fn x -> x + 3 end) == 3
+    assert Util.apply_if(0, false, fn x -> x + 3 end) == 0
+  end
+
+  test "apply_if/3 accepts a func as 2nd param" do
+    assert Util.apply_if(0, &(&1 == 0), &(&1 + 3)) == 3
+    assert Util.apply_if(0, &(&1 != 0), &(&1 + 3)) == 0
   end
 end

@@ -46,4 +46,20 @@ defmodule Spaceship.Util do
       Map.put(acc, item, new_value)
     end)
   end
+
+  def apply_if(item, bool, func) when is_function(bool) do
+    if bool.(item) do
+      func.(item)
+    else
+      item
+    end
+  end
+
+  def apply_if(item, bool, func) do
+    if bool do
+      func.(item)
+    else
+      item
+    end
+  end
 end

@@ -83,4 +83,26 @@ defmodule Spaceship.PuzzlesTest do
       |> Spaceship.Puzzles.day09(2)
     end
   end
+
+  describe "day 10" do
+    test "part 1 exercise 1" do
+      asteroid_map_str = "......#.#.
+#..#.#....
+..#######.
+.#.#.###..
+.#..#.....
+..#....#.#
+#..#....#.
+.##.#..###
+##...#..#.
+.#....####"
+
+      Spaceship.Puzzles.day10(asteroid_map_str)
+    end
+
+    test "part 1" do
+      File.read!('puzzles/input/day_10.txt')
+      |> Spaceship.Puzzles.day10()
+    end
+  end
 end
