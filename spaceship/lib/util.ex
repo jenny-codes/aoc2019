@@ -62,4 +62,35 @@ defmodule Spaceship.Util do
       item
     end
   end
+
+  def vector_to_angle({0, 0}, _options), do: 0
+
+  def vector_to_angle(vector, options) do
+    vector_to_angle(vector)
+    |> apply_if(options[:offset], &(&1 - options[:offset]))
+    |> apply_if(options[:clockwise], &(360 - &1))
+    |> apply_if(&(&1 < 0), &(&1 + 360))
+    |> apply_if(&(&1 >= 360), &(&1 - 360))
+  end
+
+  def vector_to_angle({x, y}) do
+    (:math.atan2(y, x) * 180 / :math.pi())
+    |> apply_if(&(&1 < 0), &(&1 + 360))
+  end
+
+  def vector_to_distance({x, y}) do
+    (:math.pow(x, 2) + :math.pow(y, 2)) |> :math.sqrt()
+  end
+
+  def to_indexed_map(orig_list) do
+    orig_list
+    |> Enum.with_index()
+    |> Map.new(fn {item, idx} -> {idx, item} end)
+  end
+
+  def to_indexed_map(orig_list, transformer) do
+    orig_list
+    |> Enum.with_index()
+    |> Map.new(fn {item, idx} -> {idx, transformer.(item)} end)
+  end
 end

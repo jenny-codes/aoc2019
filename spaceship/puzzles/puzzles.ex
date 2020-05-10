@@ -60,13 +60,21 @@ defmodule Spaceship.Puzzles do
     )
   end
 
-  def day10(asteroid_map_str) do
+  def day10_1(asteroid_map_str) do
     asteroid_map_str
     |> Spaceship.Component.MonitoringStation.from_input()
-    |> Spaceship.Component.MonitoringStation.draw_directions()
+    |> Spaceship.Component.MonitoringStation.direction_map()
     # TODO: We can use `for` comprehension to transform a map's value
     |> Enum.map(fn {ast, dirs} -> {ast, MapSet.size(dirs)} end)
     |> Enum.max_by(fn {_ast, count} -> count end)
+    |> IO.inspect()
+  end
+
+  def day10_2(ast_map_str, station, target) do
+    ast_map_str
+    |> Spaceship.Component.MonitoringStation.from_input()
+    |> Spaceship.Component.MonitoringStation.direction_and_distance_map(station)
+    |> Spaceship.Component.MonitoringStation.find_laser_target(target)
     |> IO.inspect()
   end
 end

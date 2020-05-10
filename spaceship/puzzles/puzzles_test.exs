@@ -12,12 +12,14 @@ defmodule Spaceship.PuzzlesTest do
     :ok
   end
 
+  @tag :skip
   describe "day 05" do
     test "part 2" do
       IO.puts(Spaceship.Puzzles.day05_2(input: 5))
     end
   end
 
+  @tag :skip
   describe "day 07" do
     @tag timeout: :infinity
     test "part 2" do
@@ -30,6 +32,7 @@ defmodule Spaceship.PuzzlesTest do
       |> IO.puts()
     end
 
+    @tag :skip
     test "part 2 exercise 1" do
       sequence = "9,8,7,6,5"
 
@@ -42,6 +45,7 @@ defmodule Spaceship.PuzzlesTest do
     end
   end
 
+  @tag :skip
   describe "day 08" do
     test "part 1" do
       File.read!('puzzles/input/day_08.txt')
@@ -56,6 +60,7 @@ defmodule Spaceship.PuzzlesTest do
     end
   end
 
+  @tag :skip
   describe "day 09" do
     test "part 1 exercise 1: outputs a copy of itself" do
       Spaceship.Puzzles.day09("109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99")
@@ -84,6 +89,7 @@ defmodule Spaceship.PuzzlesTest do
     end
   end
 
+  @tag :skip
   describe "day 10" do
     test "part 1 exercise 1" do
       asteroid_map_str = "......#.#.
@@ -97,12 +103,44 @@ defmodule Spaceship.PuzzlesTest do
 ##...#..#.
 .#....####"
 
-      Spaceship.Puzzles.day10(asteroid_map_str)
+      Spaceship.Puzzles.day10_1(asteroid_map_str)
     end
 
     test "part 1" do
       File.read!('puzzles/input/day_10.txt')
-      |> Spaceship.Puzzles.day10()
+      |> Spaceship.Puzzles.day10_1()
+    end
+
+    test "part 2" do
+      File.read!('puzzles/input/day_10.txt')
+      |> Spaceship.Puzzles.day10_2({22, 28}, 200)
+    end
+
+    test "part 2 exercise 2" do
+      str = ".#..##.###...#######
+##.############..##.
+.#.######.########.#
+.###.#######.####.#.
+#####.##.#.##.###.##
+..#####..#.#########
+####################
+#.####....###.#.#.##
+##.#################
+#####.##.###..####..
+..######..##.#######
+####.##.####...##..#
+.#####..#.######.###
+##...#.##########...
+#.##########.#######
+.####.#.###.###.#.##
+....##.##.###..#####
+.#.#.###########.###
+#.#.#.#####.####.###
+###.##.####.##.#..##
+"
+      assert Spaceship.Puzzles.day10_2(str, {11, 13}, 1) == {11, 12}
+      assert Spaceship.Puzzles.day10_2(str, {11, 13}, 2) == {12, 1}
+      assert Spaceship.Puzzles.day10_2(str, {11, 13}, 200) == {8, 2}
     end
   end
 end
